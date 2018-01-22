@@ -1,0 +1,42 @@
+environment:
+  - GITLAB_CE_TAG=757796688716.dkr.ecr.eu-west-1.amazonaws.com/bitmex/gitlab:upstream-ce
+  - GITLAB_EE_TAG=757796688716.dkr.ecr.eu-west-1.amazonaws.com/bitmex/gitlab:upstream-ee
+tasks:
+  import:
+    type: docker/import
+    files: .
+  build-ce:
+    type: docker/build
+    dockerfile: Dockerfile
+    tags: ${GITLAB_CE_TAG}
+    files: .
+    labels:
+      - GIT_COMMIT=${GIT_COMMIT}
+  build-ee:
+    type: docker/build
+    dockerfile: Dockerfile
+    tags: ${GITLAB_EE_TAG}
+    arguments:
+      - GITLAB_EDITION=ee
+    files: .
+    labels:
+      - GIT_COMMIT=${GIT_COMMIT}
+  push:
+    type: docker/push
+    images:
+      - ${GITLAB_CE_TAG}
+      - ${GITLAB_EE_TAG}
+plans:
+  default:
+    stages:
+      - tasks:
+        - import
+      - tasks:
+        - build-ce
+        - build-ee
+        concurrent: true
+  deploy:
+    stages:
+      - tasks:
+        - push
+
