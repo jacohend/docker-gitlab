@@ -1,6 +1,9 @@
 environment:
-  - GITLAB_CE_TAG=757796688716.dkr.ecr.eu-west-1.amazonaws.com/bitmex/gitlab:upstream-ce
-  - GITLAB_EE_TAG=757796688716.dkr.ecr.eu-west-1.amazonaws.com/bitmex/gitlab:upstream-ee
+  - ACCOUNT_ID=662839120368
+  - REGION=eu-west-1
+  - REGISTRY=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+  - GITLAB_CE_TAG=${REGISTRY}/bitmex/gitlab:upstream-ce
+  - GITLAB_EE_TAG=${REGISTRY}/bitmex/gitlab:upstream-ee
 tasks:
   import:
     type: docker/import
@@ -9,7 +12,7 @@ tasks:
     type: docker/build
     dockerfile: Dockerfile
     tags: ${GITLAB_CE_TAG}
-    files: .
+    files: ./*
     labels:
       - GIT_COMMIT=${GIT_COMMIT}
   build-ee:
@@ -18,7 +21,7 @@ tasks:
     tags: ${GITLAB_EE_TAG}
     arguments:
       - GITLAB_EDITION=ee
-    files: .
+    files: ./*
     labels:
       - GIT_COMMIT=${GIT_COMMIT}
   push:
