@@ -1,9 +1,7 @@
 environment:
-  - ACCOUNT_ID=662839120368
-  - REGION=eu-west-1
-  - REGISTRY=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
-  - GITLAB_CE_TAG=${REGISTRY}/bitmex/gitlab:upstream-ce
-  - GITLAB_EE_TAG=${REGISTRY}/bitmex/gitlab:upstream-ee
+  - VERSION=10.3.5-ldap-ssh
+  - GITLAB_CE_TAG=rwgrim/gitlab:ce-${VERSION}
+  - GITLAB_EE_TAG=rwgrim/gitlab:ee-${VERSION}
 tasks:
   import:
     type: docker/import
