@@ -1,5 +1,5 @@
 environment:
-  - VERSION=10.3.5-ldap-ssh
+  - VERSION=10.6.1-ldap-ssh
   - GITLAB_CE_TAG=rwgrim/gitlab:ce-${VERSION}
   - GITLAB_EE_TAG=rwgrim/gitlab:ee-${VERSION}
 tasks:
