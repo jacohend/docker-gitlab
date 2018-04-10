@@ -1,0 +1,43 @@
+environment:
+  - VERSION=10.3.5-ldap-ssh
+  - GITLAB_CE_TAG=rwgrim/gitlab:ce-${VERSION}
+  - GITLAB_EE_TAG=rwgrim/gitlab:ee-${VERSION}
+tasks:
+  import:
+    type: docker/import
+    files: .
+  build-ce:
+    type: docker/build
+    dockerfile: Dockerfile
+    tags: ${GITLAB_CE_TAG}
+    files: ./*
+    labels:
+      - GIT_COMMIT=${GIT_COMMIT}
+  build-ee:
+    type: docker/build
+    dockerfile: Dockerfile
+    tags: ${GITLAB_EE_TAG}
+    arguments:
+      - GITLAB_EDITION=ee
+    files: ./*
+    labels:
+      - GIT_COMMIT=${GIT_COMMIT}
+  push:
+    type: docker/push
+    images:
+      - ${GITLAB_CE_TAG}
+      - ${GITLAB_EE_TAG}
+plans:
+  default:
+    stages:
+      - tasks:
+        - import
+      - tasks:
+        - build-ce
+        - build-ee
+        concurrent: true
+  deploy:
+    stages:
+      - tasks:
+        - push
+
