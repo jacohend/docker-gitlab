@@ -21,6 +21,7 @@ exec_as_git() {
   if [[ $(whoami) == ${GITLAB_USER} ]]; then
     $@
   else
+    echo $(whoami)
     sudo -HEu ${GITLAB_USER} "$@"
   fi
 }
@@ -350,7 +351,7 @@ cat > /etc/supervisor/conf.d/sshd.conf <<EOF
 [program:sshd]
 directory=/
 command=/usr/sbin/sshd -D -E ${GITLAB_LOG_DIR}/supervisor/%(program_name)s.log
-user=root
+user=git
 autostart=true
 autorestart=true
 stdout_logfile=${GITLAB_LOG_DIR}/supervisor/%(program_name)s.log
@@ -363,7 +364,7 @@ cat > /etc/supervisor/conf.d/nginx.conf <<EOF
 priority=20
 directory=/tmp
 command=/usr/sbin/nginx -g "daemon off;"
-user=root
+user=git
 autostart=true
 autorestart=true
 stdout_logfile=${GITLAB_LOG_DIR}/supervisor/%(program_name)s.log
@@ -376,7 +377,7 @@ cat > /etc/supervisor/conf.d/cron.conf <<EOF
 priority=20
 directory=/tmp
 command=/usr/sbin/cron -f
-user=root
+user=git
 autostart=true
 autorestart=true
 stdout_logfile=${GITLAB_LOG_DIR}/supervisor/%(program_name)s.log

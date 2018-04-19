@@ -24,6 +24,14 @@ ENV GITLAB_INSTALL_DIR="${GITLAB_HOME}/gitlab" \
     GITLAB_BUILD_DIR="${GITLAB_CACHE_DIR}/build" \
     GITLAB_RUNTIME_DIR="${GITLAB_CACHE_DIR}/runtime"
 
+ENV GITLAB_REPOS_DIR="${GITLAB_REPOS_DIR:-$GITLAB_DATA_DIR/repositories}"
+ENV GITLAB_DOWNLOADS_DIR="${GITLAB_DOWNLOADS_DIR:-$GITLAB_TEMP_DIR/downloads}"
+ENV GITLAB_SHARED_DIR="${GITLAB_SHARED_DIR:-$GITLAB_DATA_DIR/shared}"
+ENV GITLAB_ARTIFACTS_DIR="${GITLAB_ARTIFACTS_DIR:-$GITLAB_SHARED_DIR/artifacts}"
+ENV GITLAB_PAGES_DIR="${GITLAB_PAGES_DIR:-$GITLAB_SHARED_DIR/pages}"
+ENV GITLAB_LFS_OBJECTS_DIR="${GITLAB_LFS_OBJECTS_DIR:-$GITLAB_SHARED_DIR/lfs-objects}"
+
+
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E1DD270288B4E6030699E45FA1715D88E1DF1F24 \
  && echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu xenial main" >> /etc/apt/sources.list \
  && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 80F70E11F0F0D5F10CB20E62F5DA5F09C3173AA6 \
@@ -55,12 +63,27 @@ COPY assets/build/ ${GITLAB_BUILD_DIR}/
 RUN bash ${GITLAB_BUILD_DIR}/install.sh
 
 COPY assets/runtime/ ${GITLAB_RUNTIME_DIR}/
+
 COPY entrypoint.sh /sbin/entrypoint.sh
 RUN chmod 755 /sbin/entrypoint.sh
 
+COPY init.sh /sbin/init.sh
+RUN chmod 755 /sbin/init.sh
+
 EXPOSE 22/tcp 80/tcp 443/tcp
 
-VOLUME ["${GITLAB_DATA_DIR}", "${GITLAB_LOG_DIR}"]
 WORKDIR ${GITLAB_INSTALL_DIR}
+
+#COPY bitmex-root.crt /usr/local/share/ca-certificates
+
+RUN set -ex && \
+    update-ca-certificates --fresh
+
+RUN /sbin/init.sh
+
+ADD noop.sh /bin/chmod
+ADD noop.sh /bin/chown
+
+USER git
 ENTRYPOINT ["/sbin/entrypoint.sh"]
 CMD ["app:start"]
